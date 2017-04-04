@@ -9,12 +9,13 @@ const uint8_t chipSelect = SS;
 StaticJsonBuffer<200> jsonBuffer;
 JsonObject& root = jsonBuffer.createObject();
 File myFile;
+uint32_t position;
 char str[256];
 char rd[256];
 char line[256];
 int r = 0;
-size_t n;
-
+size_t n = 1;
+int a;
 void setup() {
   Serial.begin(9600);
   while (!Serial) {
@@ -42,6 +43,9 @@ void setup() {
   if (!sd.begin(chipSelect, SPI_HALF_SPEED)) {
     sd.initErrorHalt();
   }
+  //WriteLine();
+  SendLine();
+
 }
 
 
@@ -60,8 +64,8 @@ bool CheckNet() {
 }
 
 void WriteLine() {
-  if(!myFile.open("logfile.txt", O_RDWR | O_CREAT | O_AT_END)) {
-    sd.errorHalt("Opening logfile.txt for write failed");
+  if(!myFile.open("a.txt", O_RDWR | O_CREAT | O_AT_END)) {
+    sd.errorHalt("Opening a.txt for write failed");
   }
   myFile.seekEnd();
   myFile.println(str);
@@ -71,13 +75,28 @@ void WriteLine() {
 }
 
 void SendLine() {
-  if(!myFile.open("logfile.txt", O_RDWR)) {
-    sd.errorHalt("Opening logfile.txt for read failed");
+  if(!myFile.open("a.txt", O_RDWR)) {
+    sd.errorHalt("Opening a.txt for read failed");
   }
-  while((n = myFile.fgets(rd, sizeof(rd))) > 0){
-    line = rd;
+  int count = 0;
+  //myFile.rewind();
+  while(1) {
+    
+    position = myFile.curPosition();
+    n = myFile.fgets(rd, sizeof(rd));
+    for(int i = 0; i<sizeof(rd); i++) {
+      line[i] = rd[i];
+    }
+    a = myFile.curPosition();
+    Serial.println(position);
+    Serial.println(line);
+    Serial.println(a);
   }
+
+
+  myFile.close();
 }
+
 void loop() {
 /*  bool n = CheckNet();
   if(n == 0){
