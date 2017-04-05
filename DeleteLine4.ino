@@ -14,7 +14,7 @@ char str[256];
 char rd[256];
 char line[256];
 int r = 0;
-size_t n = 1;
+int n = 1;
 int a;
 void setup() {
   Serial.begin(9600);
@@ -48,8 +48,6 @@ void setup() {
 
 }
 
-
-
 bool CheckNet() {
   r = random(10);
   Serial.println(r);
@@ -75,26 +73,32 @@ void WriteLine() {
 }
 
 void SendLine() {
-  if(!myFile.open("a.txt", O_RDWR)) {
+  if(!myFile.open("a.txt", O_RDWR )) {
     sd.errorHalt("Opening a.txt for read failed");
   }
-  int count = 0;
-  //myFile.rewind();
-  while(1) {
-    
+  while(myFile.available()){
     position = myFile.curPosition();
     n = myFile.fgets(rd, sizeof(rd));
     for(int i = 0; i<sizeof(rd); i++) {
       line[i] = rd[i];
     }
-    a = myFile.curPosition();
-    Serial.println(position);
-    Serial.println(line);
-    Serial.println(a);
   }
+  if(!myFile.seekSet(position)) {
+    sd.errorHalt("Error in positioning");
+  }
+  /*for(int j=0; j<sizeof(line); j++) {
+    myFile.write("*");
+  } */
 
-
+  myFile.rewind();
+  /*int jsondata;
+  while ((jsondata = myFile.read()) >= 0) {
+    Serial.write(jsondata);
+  } */
   myFile.close();
+  Serial.println(position);
+  Serial.println(line);
+
 }
 
 void loop() {
